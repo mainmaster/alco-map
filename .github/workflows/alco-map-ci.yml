@@ -16,6 +16,12 @@ jobs:
       - run: pip install -e ./[dev]
       - run: flake8
 
+  init_db:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - run: docker-compose up db -d
+
   tests:
     needs: lint
     runs-on: ubuntu-latest
