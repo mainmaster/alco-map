@@ -1,7 +1,7 @@
 async def get_store(current_address):
     pass
 
-async def add_store(address, image, coordinates=None):
+async def add_store(address, image, name, description,coordinates=None):
     pass
 
 async def add_like(store_id, user_from=None, positive=True):
