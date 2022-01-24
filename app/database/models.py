@@ -21,6 +21,7 @@ class Like(Base):
     positive = Column(Boolean)
     user_from = Column(String, default=None)
 
+
 class SearchHistory(Base):
     __tablename__ = "search_history"
     id = Column(Integer, primary_key=True)
