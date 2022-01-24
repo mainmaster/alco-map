@@ -19,7 +19,7 @@ class Like(Base):
     id = Column(Integer, primary_key=True)
     store_id = Column(Integer, ForeignKey("stores.id"), primary_key=True)
     positive = Column(Boolean)
-    user_from = Column(String)
+    user_from = Column(String, default=None)
 
 class SearchHistory(Base):
     __tablename__ = "search_history"
