@@ -3,9 +3,6 @@ on: push
 
 jobs:
 
-  postgres_test:
-    runs-on: ubuntu-latest
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -20,8 +17,11 @@ jobs:
       - run: flake8
 
   tests:
+    needs: lint
+    runs-on: ubuntu-latest
+
     services:
-      postgres:
+      postgres_test:
         image: postgis/postgis:14-3.2-alpine
         env:
           POSTGRES_DB: test_alco_map
@@ -36,8 +36,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    needs: lint
-    runs-on: ubuntu-latest
+
     env:
       ALCO_MAP_DB_HOST: localhost
       ALCO_MAP_DB_USER: admin
