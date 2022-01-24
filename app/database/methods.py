@@ -4,5 +4,5 @@ async def get_store(current_address):
 async def add_store(address, image, coordinates=None):
     pass
 
-async def add_like(positive=True):
+async def add_like(user_from, positive=True):
     pass
