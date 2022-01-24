@@ -1,0 +1,18 @@
+services:
+
+  db:
+    image: postgis/postgis:14-3.2-alpine
+    environment:
+      POSTGRES_USER: alco-map
+      POSTGRES_PASSWORD: alco-map
+      POSTGRES_DATABASE: alco-map
+
+  alco-map:
+    build: .
+    depends_on:
+      - db
+    environment:
+      ALCO_MAP_DB_HOST: db
+      ALCO_MAP_DB_USER: alco-map
+      ALCO_MAP_DB_PASSWORD: alco-map
+      ALCO_MAP_DB_DATABASE: alco-map
