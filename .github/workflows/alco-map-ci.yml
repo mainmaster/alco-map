@@ -32,7 +32,7 @@ jobs:
           cache: pip
           cache-dependency-path: requirements/*.txt
       - name: postgres start
-        run: docker-compose -f docker-compose.yml up -d --build
+        run: docker-compose -f docker-compose.yml up db -d --build
       - name: python requirements
         run: pip install wheel && pip install -e ./[dev]
       - name: tests
