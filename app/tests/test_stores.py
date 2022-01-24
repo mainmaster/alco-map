@@ -2,7 +2,7 @@ import pytest
 
 from database.models import Base
 from database.engine import engine
-
+from database.methods import add_store
 
 @pytest.fixture
 async def database():
@@ -12,5 +12,5 @@ async def database():
 
 
 @pytest.mark.asyncio
-async def test_create_store(database):
+async def test_add_store(database):
     pass
