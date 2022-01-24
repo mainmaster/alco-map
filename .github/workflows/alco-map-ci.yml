@@ -20,7 +20,7 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     env:
-      DB_HOST: localhost
+      DB_HOST: db
       DB_USER: admin
       ALCO_MAP_DB_PASSWORD: password
       ALCO_MAP_DB_DATABASE: test_alco_map
