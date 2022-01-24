@@ -11,6 +11,7 @@ class Store(Base):
     name = Column(String)
     description = Column(String)
     address = Column(String)
+    image_b64 = Column(String, default=None)
     coordinates = Column(Geometry(geometry_type="POINT", srid=27700))
 
 
