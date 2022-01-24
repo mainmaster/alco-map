@@ -2,9 +2,9 @@ import pytest
 from shapely import wkb
 from sqlalchemy.future import select
 
-from database.engine import engine, async_session
-from database.methods import add_store
-from database.models import Base, Store
+from alco_map.database.engine import engine, async_session
+from alco_map.database.methods import add_store
+from alco_map.database.models import Base, Store
 
 
 @pytest.fixture
