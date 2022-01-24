@@ -5,3 +5,4 @@ geoalchemy2
 giveme
 loguru
 sqlalchemy
+shapely
