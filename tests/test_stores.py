@@ -1,14 +1,19 @@
 import pytest
 from shapely import wkb
 from sqlalchemy.future import select
+from testcontainers.postgres import PostgresContainer
 
+from alco_map.database.engine import engine, async_session
 from alco_map.database.methods import add_store
 from alco_map.database.models import Base, Store
-from engine import engine, async_session
 
 
 @pytest.fixture
 async def database():
+    postgres_container = PostgresContainer("postgis/postgis:14-3.2-alpine", dbname="alco-map")
+    postgres = postgres_container.start()
+    connection_url = postgres.get_connection_url().replace("psycopg2", "asyncpg")
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
