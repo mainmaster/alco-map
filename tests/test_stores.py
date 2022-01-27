@@ -1,26 +1,12 @@
 import pytest
 from shapely import wkb
 from sqlalchemy.future import select
-from testcontainers.postgres import PostgresContainer
 
-from alco_map.database.engine import engine, async_session
-from alco_map.database.methods import add_store
-from alco_map.database.models import Base, Store
-
-
-@pytest.fixture
-async def database():
-    postgres_container = PostgresContainer("postgis/postgis:14-3.2-alpine", dbname="alco-map")
-    postgres = postgres_container.start()
-    connection_url = postgres.get_connection_url().replace("psycopg2", "asyncpg")
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
+from alco_map.database.models import Store
 
 
 @pytest.mark.asyncio
-async def test_add_store(database):
+async def test_add_store(store):
     address = "Ланское шоссе 228"
     image = "b64image"
     name = "Оранжевый"
@@ -28,12 +14,12 @@ async def test_add_store(database):
     lat = 228
     lon = 229
 
-    await add_store(address,
-                    image,
-                    name,
-                    description, lat, lon)
+    await store.add_store(address,
+                          image,
+                          name,
+                          description, lat, lon)
 
-    async with async_session() as session:
+    async with store.session() as session:
         async with session.begin():
             stmt = select(Store)
             result = await session.execute(stmt)

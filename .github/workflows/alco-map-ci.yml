@@ -24,9 +24,9 @@ jobs:
       postgres_test:
         image: postgis/postgis:14-3.2-alpine
         env:
-          POSTGRES_DB: test_alco_map
-          POSTGRES_PASSWORD: password
-          POSTGRES_USER: admin
+          POSTGRES_DB: alco_map
+          POSTGRES_PASSWORD: alco_map
+          POSTGRES_USER: alco_map
         ports:
           - 5432:5432
         # Set health checks to wait until postgres has started
@@ -39,9 +39,9 @@ jobs:
 
     env:
       ALCO_MAP_DB_HOST: localhost
-      ALCO_MAP_DB_USER: admin
-      ALCO_MAP_DB_PASSWORD: password
-      ALCO_MAP_DB_DATABASE: test_alco_map
+      ALCO_MAP_DB_USER: alco_map
+      ALCO_MAP_DB_PASSWORD: alco_map
+      ALCO_MAP_DB_DATABASE: alco_map
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -51,4 +51,4 @@ jobs:
           cache-dependency-path: requirements/*.txt
       - run: pip install wheel
       - run: pip install -e ./[dev]
-      - run: pytest
+      - run: pytest --local-dsn=postgresql+asyncpg://alco_map:alco_map@localhost/alco_map
