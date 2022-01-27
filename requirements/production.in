@@ -6,3 +6,4 @@ giveme
 loguru
 sqlalchemy
 shapely
+testcontainers
