@@ -1,6 +1,10 @@
+from typing import Iterable
+
 from cock import Option, build_options_from_dict
 from facet import ServiceMixin
+from geoalchemy2 import func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.future import select
 from sqlalchemy.orm import sessionmaker
 from yarl import URL
 
@@ -22,11 +26,28 @@ class Database(ServiceMixin):
 
         self.session_factory = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
 
-    async def get_nearest_stores(self, current_address):
-        pass
-
-    async def add_store(self, address, image_b64, name, description, latitude, longitude):
+    async def get_nearest_stores(self, latitude: float, longitude: float) -> Iterable[Store]:
         """
+        Get nearest store by coordinates
+
+        :param latitude: Store latitude
+        :param longitude: Store longitude
+        :return:
+        """
+        async with self.session_factory() as session, session.begin():
+            point = func.ST_GeomFromText(f"POINT({longitude} {latitude})", 27700)
+            query = select(Store, func.ST_Distance(Store.coordinates, point)
+                           .label('distance')) \
+                .order_by('distance') \
+                .limit(10)
+            result = await session.execute(query)
+            return result.scalars()
+
+    async def add_store(self, address: str, image_b64: str, name: str, description: str, latitude: float,
+                        longitude: float) -> None:
+        """
+        Add new store
+
         :param address: Store address (Alco street 33)
         :param image_b64: Store image in b64
         :param name: Store name (ex - Продукты 24)
@@ -35,7 +56,7 @@ class Database(ServiceMixin):
         :param longitude: Store longitude
         :return:
         """
-        coordinates = f"POINT({latitude} {longitude})"
+        coordinates = f"POINT({longitude} {latitude})"
         store = Store(address=address,
                       image_b64=image_b64,
                       name=name,
