@@ -19,11 +19,11 @@ def local_dsn(request):
 @pytest_asyncio.fixture(scope="session")
 def db_dsn(local_dsn):
     if local_dsn:
-        return local_dsn
-
-    with PostgresContainer("postgis/postgis:14-3.2-alpine", dbname="alco-map") as pg:
-        connection_url = pg.get_connection_url()
-        yield URL(connection_url).with_scheme("postgresql+asyncpg")
+        yield local_dsn
+    else:
+        with PostgresContainer("postgis/postgis:14-3.2-alpine", dbname="alco-map") as pg:
+            connection_url = pg.get_connection_url()
+            yield URL(connection_url).with_scheme("postgresql+asyncpg")
 
 
 @pytest_asyncio.fixture(scope="session")
