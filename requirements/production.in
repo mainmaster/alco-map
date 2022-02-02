@@ -1,0 +1,8 @@
+cock
+facet
+geoalchemy2
+giveme
+loguru
+shapely
+sqlalchemy[asyncio,postgresql_asyncpg]
+yarl

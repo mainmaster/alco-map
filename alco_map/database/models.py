@@ -1,5 +1,5 @@
 from geoalchemy2.types import Geometry
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()

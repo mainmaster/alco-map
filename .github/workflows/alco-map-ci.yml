@@ -1,0 +1,51 @@
+name: alco-map
+on: push
+
+jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.10.2'
+          cache: pip
+          cache-dependency-path: requirements/*.txt
+      - run: pip install wheel
+      - run: pip install -e ./[dev]
+      - run: flake8
+
+  tests:
+    needs: lint
+    runs-on: ubuntu-latest
+    services:
+      postgis:
+        image: postgis/postgis:14-3.2-alpine
+        env:
+          POSTGRES_DB: alco_map
+          POSTGRES_PASSWORD: alco_map
+          POSTGRES_USER: alco_map
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      ALCO_MAP_DB_HOST: localhost
+      ALCO_MAP_DB_USER: alco_map
+      ALCO_MAP_DB_PASSWORD: alco_map
+      ALCO_MAP_DB_DATABASE: alco_map
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.10.2'
+          cache: pip
+          cache-dependency-path: requirements/*.txt
+      - run: pip install wheel
+      - run: pip install -e ./[dev]
+      - run: pytest --local-dsn=postgresql+asyncpg://alco_map:alco_map@localhost/alco_map
