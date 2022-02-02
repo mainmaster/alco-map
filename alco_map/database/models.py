@@ -12,7 +12,7 @@ class Store(Base):
     description = Column(String)
     address = Column(String)
     image_b64 = Column(String, default=None)
-    coordinates = Column(Geometry(geometry_type="POINT", srid=27700))
+    coordinates = Column(Geometry(geometry_type="POINT", srid=4326))
 
 
 class Like(Base):
@@ -27,4 +27,4 @@ class SearchHistory(Base):
     __tablename__ = "search_history"
     id = Column(Integer, primary_key=True)
     address = Column(String, default=None)
-    coordinates = Column(Geometry(geometry_type="POINT", srid=27700), default=None)
+    coordinates = Column(Geometry(geometry_type="POINT", srid=4326), default=None)

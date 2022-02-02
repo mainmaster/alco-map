@@ -35,7 +35,7 @@ class Database(ServiceMixin):
         :return:
         """
         async with self.session_factory() as session, session.begin():
-            point = func.ST_GeomFromText(f"POINT({longitude} {latitude})", 27700)
+            point = func.ST_GeomFromText(f"POINT({longitude} {latitude})", 4326)
             query = select(Store, func.ST_Distance(Store.coordinates, point)
                            .label('distance')) \
                 .order_by('distance') \
