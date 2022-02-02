@@ -5,7 +5,7 @@
 #    pip-compile --output-file=requirements/production.txt requirements/production.in
 #
 asyncpg==0.25.0
-    # via -r requirements/production.in
+    # via sqlalchemy
 click==8.0.3
     # via cock
 cock==0.9.0
@@ -18,21 +18,25 @@ giveme==1.2.0
     # via -r requirements/production.in
 greenlet==1.1.2
     # via sqlalchemy
+idna==3.3
+    # via yarl
 loguru==0.5.3
     # via -r requirements/production.in
+multidict==6.0.2
+    # via yarl
 packaging==21.3
     # via geoalchemy2
 pyparsing==3.0.7
     # via packaging
 pyyaml==6.0
     # via cock
+shapely==1.8.0
+    # via -r requirements/production.in
 sortedcontainers==2.4.0
     # via cock
-sqlalchemy==1.4.31
+sqlalchemy[asyncio,postgresql_asyncpg]==1.4.31
     # via
     #   -r requirements/production.in
     #   geoalchemy2
-shapely==1.8.0
+yarl==1.7.2
     # via -r requirements/production.in
-testcontainers==3.4.2
-    # via pytest

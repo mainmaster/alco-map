@@ -19,9 +19,8 @@ jobs:
   tests:
     needs: lint
     runs-on: ubuntu-latest
-
     services:
-      postgres_test:
+      postgis:
         image: postgis/postgis:14-3.2-alpine
         env:
           POSTGRES_DB: alco_map
@@ -35,8 +34,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
-
     env:
       ALCO_MAP_DB_HOST: localhost
       ALCO_MAP_DB_USER: alco_map

@@ -6,7 +6,7 @@ from alco_map.database.models import Store
 
 
 @pytest.mark.asyncio
-async def test_add_store(store):
+async def test_add_store(db):
     address = "Ланское шоссе 228"
     image = "b64image"
     name = "Оранжевый"
@@ -14,22 +14,21 @@ async def test_add_store(store):
     lat = 228
     lon = 229
 
-    await store.add_store(address,
-                          image,
-                          name,
-                          description, lat, lon)
+    await db.add_store(address,
+                       image,
+                       name,
+                       description, lat, lon)
 
-    async with store.session() as session:
-        async with session.begin():
-            stmt = select(Store)
-            result = await session.execute(stmt)
-            store = result.scalars().first()
+    async with db.session_factory() as session, session.begin():
+        stmt = select(Store)
+        result = await session.execute(stmt)
+        store = result.scalars().first()
 
-            point = wkb.loads(bytes(store.coordinates.data))
+        point = wkb.loads(bytes(store.coordinates.data))
 
-            assert store.name == name
-            assert store.image_b64 == image
-            assert store.address == address
-            assert store.description == description
-            assert point.x == lat
-            assert point.y == lon
+        assert store.name == name
+        assert store.image_b64 == image
+        assert store.address == address
+        assert store.description == description
+        assert point.x == lat
+        assert point.y == lon
