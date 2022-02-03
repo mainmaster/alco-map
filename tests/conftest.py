@@ -3,8 +3,8 @@ from cock import Config
 from testcontainers.postgres import PostgresContainer
 from yarl import URL
 
-from alco_map.database.models import Base
 from alco_map.database import database_from_config
+from alco_map.database.models import Base
 
 
 def pytest_addoption(parser):
