@@ -104,7 +104,9 @@ class Database(ServiceMixin):
         :return: List with negative and positive likes count
         """
         async with self.session_factory() as session, session.begin():
-            query = select(func.count(Like.positive)).group_by(Like.positive).order_by(Like.positive)
+            query = select(func.count(Like.positive)) \
+                .where(Like.store_id == store_id) \
+                .group_by(Like.positive).order_by(Like.positive)
             result = await session.execute(query)
             return result.scalars().all()
 
