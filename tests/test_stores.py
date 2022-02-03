@@ -1,8 +1,10 @@
+import datetime
+
 import pytest
 from shapely import wkb
 from sqlalchemy.future import select
 
-from alco_map.database.models import Store
+from alco_map.database.models import Store, Like
 
 
 @pytest.mark.asyncio
@@ -68,3 +70,60 @@ async def test_get_nearest_stores(db):
     async with db.session_factory() as session, session.begin():
         for store in test_stores:
             session.delete(store)
+
+
+@pytest.mark.asyncio
+async def test_add_like(db):
+    store = Store(id=123,
+                  address="Ланское шоссе 2",
+                  image_b64="b64image",
+                  name="Оранжевый2",
+                  description="Лучший на районе2",
+                  coordinates=f"POINT(30.308879 59.992483)")
+
+    async with db.session_factory() as session, session.begin():
+        session.add(store)
+
+    test_data = (123, "Санек", False,)
+    assert await db.add_like(*test_data)
+    assert not await db.add_like(*test_data)
+
+    async with db.session_factory() as session, session.begin():
+        stmt = select(Like)
+        result = await session.execute(stmt)
+        like = result.scalars().first()
+        like.like_datetime = datetime.datetime.now() - datetime.timedelta(hours=3, minutes=58)
+        await session.commit()
+
+    assert await db.add_like(*test_data)
+
+    async with db.session_factory() as session, session.begin():
+        session.delete(like)
+        session.delete(store)
+
+
+@pytest.mark.asyncio
+async def test_get_likes_count(db):
+    user_ids = ["1", "2", "Vasya", "Саня", "Армен"]
+    user_votes = [True, True, True, False, False]
+    likes = []
+    store = Store(id=123,
+                  address="Ланское шоссе 2",
+                  image_b64="b64image",
+                  name="Оранжевый2",
+                  description="Лучший на районе2",
+                  coordinates=f"POINT(30.308879 59.992483)")
+
+    for user_id, user_vote in zip(user_ids, user_votes):
+        like = Like(store_id=store.id,
+                    user_from=user_id,
+                    positive=user_vote)
+        likes.append(like)
+    async with db.session_factory() as session, session.begin():
+        session.add(store)
+    async with db.session_factory() as session, session.begin():
+        session.add_all(likes)
+
+    negative, positive = await db.get_likes(store.id)
+    assert negative == user_votes.count(False)
+    assert positive == user_votes.count(True)
