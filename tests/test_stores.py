@@ -79,7 +79,7 @@ async def test_add_like(db):
                   image_b64="b64image",
                   name="Оранжевый2",
                   description="Лучший на районе2",
-                  coordinates=f"POINT(30.308879 59.992483)")
+                  coordinates="POINT(30.308879 59.992483)")
 
     async with db.session_factory() as session, session.begin():
         session.add(store)
@@ -112,7 +112,7 @@ async def test_get_likes_count(db):
                   image_b64="b64image",
                   name="Оранжевый2",
                   description="Лучший на районе2",
-                  coordinates=f"POINT(30.308879 59.992483)")
+                  coordinates="POINT(30.308879 59.992483)")
 
     for user_id, user_vote in zip(user_ids, user_votes):
         like = Like(store_id=store.id,
