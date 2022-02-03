@@ -1,6 +1,7 @@
 from geoalchemy2.types import Geometry
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -17,14 +18,16 @@ class Store(Base):
 
 class Like(Base):
     __tablename__ = "likes"
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     store_id = Column(Integer, ForeignKey("stores.id"), primary_key=True)
     positive = Column(Boolean)
-    user_from = Column(String, default=None)
+    like_datetime = Column(DateTime, default=datetime.now())
+    user_from = Column(String, default=None, index=True)
 
 
 class SearchHistory(Base):
     __tablename__ = "search_history"
     id = Column(Integer, primary_key=True)
-    address = Column(String, default=None)
+    query_datetime = Column(DateTime, default=datetime.now())
+    user_from = Column(String, default=None)
     coordinates = Column(Geometry(geometry_type="POINT", srid=4326), default=None)
