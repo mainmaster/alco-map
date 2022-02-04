@@ -131,3 +131,6 @@ dmypy.json
 # Editor settings
 .idea
 .vscode
+
+# temporary files and researches
+tmp/
