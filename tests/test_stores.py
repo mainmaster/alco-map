@@ -92,7 +92,7 @@ async def test_add_like(db):
         stmt = select(Like)
         result = await session.execute(stmt)
         like = result.scalars().first()
-        like.like_datetime = datetime.datetime.now() - datetime.timedelta(hours=3, minutes=58)
+        like.like_datetime = datetime.datetime.utcnow() - datetime.timedelta(hours=3, minutes=58)
         await session.commit()
 
     assert await db.add_like(*test_data)

@@ -2,7 +2,7 @@ from geoalchemy2.shape import to_shape
 from geoalchemy2.types import Geometry
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime
+from sqlalchemy.sql import func
 
 Base = declarative_base()
 
@@ -29,13 +29,13 @@ class Like(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     store_id = Column(Integer, ForeignKey("stores.id"), primary_key=True)
     positive = Column(Boolean)
-    like_datetime = Column(DateTime, default=datetime.now())
+    like_datetime = Column(DateTime, default=func.now())
     user_from = Column(String, default=None, index=True)
 
 
 class SearchHistory(Base):
     __tablename__ = "search_history"
     id = Column(Integer, primary_key=True)
-    query_datetime = Column(DateTime, default=datetime.now())
+    query_datetime = Column(DateTime, default=func.now())
     user_from = Column(String, default=None)
     coordinates = Column(Geometry(geometry_type="POINT", srid=4326), default=None)

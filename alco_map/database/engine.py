@@ -27,7 +27,7 @@ class Database(ServiceMixin):
 
         self.session_factory = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
 
-    async def get_nearest_stores(self, latitude: float, longitude: float, user_from: Union[str, None] = None) -> \
+    async def get_nearest_stores(self, latitude: float, longitude: float, user_from: str | None = None) -> \
             Iterable[Store]:
         """
         Get nearest store by coordinates
@@ -42,7 +42,7 @@ class Database(ServiceMixin):
             coordinates = func.ST_GeomFromText(point, 4326)
             query = select(Store, func.ST_Distance(Store.coordinates, coordinates)
                            .label('distance')) \
-                .order_by('distance') \
+                .order_by("distance") \
                 .limit(10)
             result = await session.execute(query)
             session.add(SearchHistory(user_from=user_from, coordinates=coordinates))
@@ -89,19 +89,19 @@ class Database(ServiceMixin):
         async with self.session_factory() as session, session.begin():
             query = select(Like).where(Like.user_from == user_from,
                                        Like.store_id == store_id,
-                                       Like.like_datetime > datetime.datetime.now() - datetime.timedelta(hours=3))
+                                       Like.like_datetime > datetime.datetime.utcnow() - datetime.timedelta(hours=3))
             result = await session.execute(query)
             if result.scalars().first():
                 return False
             session.add(like)
         return True
 
-    async def get_likes(self, store_id: int) -> List[int]:
+    async def get_likes(self, store_id: int) -> list[int]:
         """
         Get negative and positive likes
 
         :param store_id: Store ID
-        :return: List with negative and positive likes count
+        :return: List with negative and positive likes count, ex [10, 5], 10 - negative, 5 - positive
         """
         async with self.session_factory() as session, session.begin():
             query = select(func.count(Like.positive)) \
