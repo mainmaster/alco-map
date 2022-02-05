@@ -1,3 +1,4 @@
+from geoalchemy2.shape import to_shape
 from geoalchemy2.types import Geometry
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
@@ -14,6 +15,13 @@ class Store(Base):
     address = Column(String)
     image_b64 = Column(String, default=None)
     coordinates = Column(Geometry(geometry_type="POINT", srid=4326))
+
+    def get_location(self) -> dict:
+        point = to_shape(self.coordinates)
+        return {
+            "latitude": point.y,
+            "longitude": point.x,
+        }
 
 
 class Like(Base):

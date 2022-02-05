@@ -35,8 +35,6 @@ async def test_add_store(db):
         assert point.x == lon
         assert point.y == lat
 
-        session.delete(store)
-
 
 @pytest.mark.asyncio
 async def test_get_nearest_stores(db):
@@ -67,9 +65,11 @@ async def test_get_nearest_stores(db):
     assert result_stores[1].name == test_data[2][2]
     assert result_stores[2].name == test_data[0][2]
 
-    async with db.session_factory() as session, session.begin():
-        for store in test_stores:
-            session.delete(store)
+    location = result_stores[0].get_location()
+    assert location == {
+        "latitude": test_data[1][4],
+        "longitude": test_data[1][5],
+    }
 
 
 @pytest.mark.asyncio
