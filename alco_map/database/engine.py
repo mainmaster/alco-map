@@ -1,5 +1,5 @@
 import datetime
-from typing import Iterable, List, Union
+from typing import Iterable
 
 from cock import Option, build_options_from_dict
 from facet import ServiceMixin
