@@ -21,7 +21,7 @@ async def test_add_store(db):
                        name,
                        description, lat, lon)
 
-    async with db.session_factory() as session:
+    async with db.session_begin_context() as session:
         stmt = select(Store)
         result = await session.execute(stmt)
         store = result.scalars().first()
@@ -55,7 +55,7 @@ async def test_get_nearest_stores(db):
                       coordinates=coordinates)
         test_stores.append(store)
 
-    async with db.session_factory() as session:
+    async with db.session_begin_context() as session:
         session.add_all(test_stores)
 
     result = await db.get_nearest_stores(my_coord[0], my_coord[1])
@@ -81,23 +81,23 @@ async def test_add_like(db):
                   description="Лучший на районе2",
                   coordinates="POINT(30.308879 59.992483)")
 
-    async with db.session_factory() as session:
+    async with db.session_begin_context() as session:
         session.add(store)
 
     test_data = (123, "Санек", False,)
     assert await db.add_like(*test_data)
     assert not await db.add_like(*test_data)
 
-    async with db.session_factory() as session:
+    async with db.session_begin_context() as session:
         stmt = select(Like)
         result = await session.execute(stmt)
         like = result.scalars().first()
-        like.like_datetime = datetime.datetime.utcnow() - datetime.timedelta(hours=3, minutes=58)
+        like.like_datetime = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=3, minutes=58)
         await session.commit()
 
     assert await db.add_like(*test_data)
 
-    async with db.session_factory() as session:
+    async with db.session_begin_context() as session:
         session.delete(like)
         session.delete(store)
 
@@ -119,9 +119,9 @@ async def test_get_likes_count(db):
                     user_from=user_id,
                     positive=user_vote)
         likes.append(like)
-    async with db.session_factory() as session:
+    async with db.session_begin_context() as session:
         session.add(store)
-    async with db.session_factory() as session:
+    async with db.session_begin_context() as session:
         session.add_all(likes)
 
     negative, positive = await db.get_likes(store.id)
