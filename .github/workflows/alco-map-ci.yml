@@ -48,4 +48,4 @@ jobs:
           cache-dependency-path: requirements/*.txt
       - run: pip install wheel
       - run: pip install -e ./[dev]
-      - run: pytest --local-dsn=postgresql+asyncpg://alco_map:alco_map@localhost/alco_map
+      - run: pytest --cov --local-dsn=postgresql+asyncpg://alco_map:alco_map@localhost/alco_map

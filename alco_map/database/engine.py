@@ -1,3 +1,5 @@
+import datetime
+from contextlib import asynccontextmanager
 from typing import Iterable
 
 from cock import Option, build_options_from_dict
@@ -8,7 +10,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import sessionmaker
 from yarl import URL
 
-from alco_map.database.models import Base, Store
+from alco_map.database.models import Base, Store, Like, SearchHistory
 from alco_map.injector import inject, register
 
 
@@ -26,21 +28,30 @@ class Database(ServiceMixin):
 
         self.session_factory = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
 
-    async def get_nearest_stores(self, latitude: float, longitude: float) -> Iterable[Store]:
+    @asynccontextmanager
+    async def session_begin_context(self):
+        async with self.session_factory() as session, session.begin():
+            yield session
+
+    async def get_nearest_stores(self, latitude: float, longitude: float, user_from: str | None = None) -> \
+            Iterable[Store]:
         """
         Get nearest store by coordinates
 
         :param latitude: Store latitude
         :param longitude: Store longitude
+        :param user_from: User ID or Nickname
         :return:
         """
-        async with self.session_factory() as session, session.begin():
-            point = func.ST_GeomFromText(f"POINT({longitude} {latitude})", 4326)
-            query = select(Store, func.ST_Distance(Store.coordinates, point)
+        async with self.session_begin_context() as session:
+            point = f"POINT({longitude} {latitude})"
+            coordinates = func.ST_GeomFromText(point, 4326)
+            query = select(Store, func.ST_Distance(Store.coordinates, coordinates)
                            .label('distance')) \
-                .order_by('distance') \
+                .order_by("distance") \
                 .limit(10)
             result = await session.execute(query)
+            session.add(SearchHistory(user_from=user_from, coordinates=coordinates))
             return result.scalars()
 
     async def add_store(self, address: str, image_b64: str, name: str, description: str, latitude: float,
@@ -63,14 +74,48 @@ class Database(ServiceMixin):
                       description=description,
                       coordinates=coordinates)
 
-        async with self.session_factory() as session, session.begin():
+        async with self.session_begin_context() as session:
             session.add(store)
 
-    async def add_like(self, store_id, user_from=None, positive=True):
-        pass
+    async def add_like(self, store_id: id, user_from: str = None, positive: bool = True) -> bool:
+        """
+        Vote for the store
+        One user cannot upvote twice positively or twice negatively within 3 hours
 
-    async def get_likes(self, store_id):
-        pass
+        :param store_id: Store ID
+        :param user_from: User ID or Nickname who gave the rating
+        :param positive: True or False (positive or negative reaction)
+        :return: boolean: False - vote not counted, True - vote counted
+        """
+
+        like = Like(store_id=store_id,
+                    user_from=user_from,
+                    positive=positive)
+
+        async with self.session_begin_context() as session:
+            query = select(Like).where(Like.user_from == user_from,
+                                       Like.store_id == store_id,
+                                       Like.like_datetime > datetime.datetime.now(datetime.timezone.utc)
+                                       - datetime.timedelta(hours=3))
+            result = await session.execute(query)
+            if result.scalars().first():
+                return False
+            session.add(like)
+        return True
+
+    async def get_likes(self, store_id: int) -> list[int]:
+        """
+        Get negative and positive likes
+
+        :param store_id: Store ID
+        :return: List with negative and positive likes count, ex [10, 5], 10 - negative, 5 - positive
+        """
+        async with self.session_begin_context() as session:
+            query = select(func.count(Like.positive)) \
+                .where(Like.store_id == store_id) \
+                .group_by(Like.positive).order_by(Like.positive)
+            result = await session.execute(query)
+            return result.scalars().all()
 
 
 @register(name="database", singleton=True)
